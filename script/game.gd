@@ -24,7 +24,7 @@ sync func update_player_name(player, player_name):
 master func request_action(action):
 	var sender = multiplayer.get_rpc_sender_id()
 	if _players[_turn] != multiplayer.get_rpc_sender_id():
-		_rpc("_log", "Someone is trying to cheat! %s" % str(sender))
+		rpc("_log", "Someone is trying to cheat! %s" % str(sender))
 		return
 	do_action(action)
 	next_turn()
