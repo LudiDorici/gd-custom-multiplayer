@@ -16,7 +16,7 @@ master func set_player_name(player_name):
 	var sender = multiplayer.get_rpc_sender_id()
 	rpc("update_player_name", sender, player_name)
 
-sync func update_player_name(player, player_name):
+puppetsync func update_player_name(player, player_name):
 	var pos = _players.find(player)
 	if pos != -1:
 		_list.set_item_text(pos, player_name)
@@ -29,11 +29,11 @@ master func request_action(action):
 	do_action(action)
 	next_turn()
 
-sync func do_action(action):
+puppetsync func do_action(action):
 	var player_name = _list.get_item_text(_turn)
-	_log("%s: %ss %d" % [player_name, action, randi() % 100])
+	rpc("_log", "%s: %ss %d" % [player_name, action, randi() % 100])
 
-sync func set_turn(turn):
+puppetsync func set_turn(turn):
 	_turn = turn
 	if turn >= _players.size():
 		return
@@ -44,7 +44,7 @@ sync func set_turn(turn):
 			_list.set_item_icon(i, null)
 	_action.disabled = _players[turn] != multiplayer.get_network_unique_id()
 
-sync func del_player(id):
+puppetsync func del_player(id):
 	var pos = _players.find(id)
 	if pos == -1:
 		return
@@ -58,7 +58,7 @@ sync func del_player(id):
 	if multiplayer.is_network_server():
 		rpc("set_turn", _turn)
 
-sync func add_player(id, player_name=""):
+puppetsync func add_player(id, player_name=""):
 	if multiplayer.is_network_server() and id != 1:
 		_log("%s:%s connected!" % [
 			multiplayer.network_peer.get_peer_address(id),
@@ -106,15 +106,15 @@ func on_peer_del(id):
 		return
 	rpc("del_player", id)
 
-sync func _log(what):
+puppetsync func _log(what):
 	$HBoxContainer/RichTextLabel.add_text(what + "\n")
 
 func _on_Action_pressed():
 	if multiplayer.is_network_server():
-		rpc("do_action", "roll")
+		do_action("roll")
 		next_turn()
 	else:
-		rpc("request_action", "roll")
+		rpc_id(1, "request_action", "roll")
 
 func _on_NameList_item_activated(index):
 	if multiplayer.is_network_server() and _players[index] != 1:
